@@ -1,0 +1,361 @@
+/*
+ * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+ * See LICENSE in the project root for license information.
+ */
+
+var running = false;
+var text = "";
+var startTime;
+
+Office.onReady(info => {
+  if (info.host === Office.HostType.PowerPoint) {
+    var timer;
+    document.getElementById("searchBox").addEventListener('keyup', function(e){ 
+      clearTimeout(timer);
+      timer = setTimeout(function(){
+        startTime = window.performance.now();
+        prepareSearch();
+      }, 1000);
+    });
+    document.getElementById("submitSearch").onclick = function(){
+      running = false;
+      startTime = window.performance.now();
+      prepareSearch();
+    }
+  }
+});
+
+async function prepareSearch(){
+  var term = document.getElementById("searchBox").value;
+
+  // az instant search (on keyup) ne keressen, ha már nyomtunk entert
+  if (running === term) {
+    return false;
+  }
+
+  running = term;
+
+  // welcome text és előző keresési eredmények törlése
+  const welcomeText = document.querySelector('#welcome-text');
+  welcomeText.style.display = "none";
+  
+  const myNode = document.getElementById("search-results");
+  while (myNode.firstChild) {
+    myNode.removeChild(myNode.firstChild);
+  }
+  showSpinner();
+  var searchResults = [];
+
+  // let translationResults = await search(term);
+  //let ref2Results = await findByRef2(term);
+
+  // let [translationResults, ref2Results] = await Promise.all([
+  //   search(term),
+  //   findByRef2(term)
+  // ]);
+
+    let [translationResults, originalResults] = await Promise.all([
+      search(term),
+      search(term, false)
+    ]);
+    console.log(translationResults);
+    function buildTranslation(){
+      processArray(translationResults, async (item, index) => {
+        item.refcode_short = await getRefCode(item.para_id);
+      });
+      console.log(translationResults);
+      return;
+    }
+    await buildTranslation();
+
+    // async function buildOriginal(){
+    //   var resultSetOrig = [];
+    //   await asyncForEach(originalResults, async (item, index) => {
+    //     if (item.refcode_short == term) {
+    //       let refcodeResult = await findByRefcode(term);
+    //       refcodeResult.forEach(translatedResult => {
+    //         translatedResult.refcode_short = item.refcode_short;
+    //         resultSetOrig.push(translatedResult);
+    //       })
+    //     };
+    //     resultSetOrig.push(item);
+    //   });
+    //   return resultSetOrig;
+    // };
+
+    // let [translated, original] = await Promise.all([
+    //   buildTranslation(),
+    //   buildOriginal()
+    // ]);
+    // console.log(translated);
+
+    searchResults = translationResults.concat(originalResults);
+
+
+  // // keresés a fordításokban
+  // let translationResults = await search(term);
+  // let originalResults = await search(term, false);
+  // // ha ennél asyncForEachet használok, akkor megvárja, viszont akkor lassú a találatok listázása
+  // //() => {
+  //   translationResults.forEach(async (item, index) => {
+  //   // await asyncForEach(translationResults, async (item, index) => {
+  //     let refCodeResult = await getRefCode(item.para_id);
+  //     item.refcode_short = refCodeResult;
+  //     searchResults.push(item);
+  //     // console.log(item);
+  //   });
+  
+  //   // ref2Results.forEach(async (item, index) => {
+  //   //   searchResults.push(item);
+  //   // });
+  // //}
+
+  // // keresés az eredeti nyelvű gyűjteményben + refcode kezelés
+  // // let originalResults = await search(term, false);
+
+  //   // ha refcodera történik a keresés, a fordításokat is adja vissza
+  //   await asyncForEach(originalResults, async (item, index) => {
+  //       if (item.refcode_short == term) {
+  //         let refcodeResult = await findByRefcode(term);
+  //         refcodeResult.forEach(translatedResult => {
+  //           translatedResult.refcode_short = item.refcode_short;
+  //           searchResults.push(translatedResult);
+  //         })
+  //       };
+  //     searchResults.push(item);
+  //   });
+
+  // // régi kód
+
+  //     // originalResults.forEach(async (item, index) => {
+  //     //   searchResults.push(item);
+  //     //   await console.log('awaiting', await findByRefcode(term));
+  //     //   // keresés refcodera
+  //     //   console.log('if előtt');
+  //     //   await (async () => {
+  //     //     if (item.refcode_short == term) {
+  //     //       console.log('az ifben');
+  //     //       console.log('ez refcodera való keresés volt');
+  //     //       // let refcodeResult = await findByRefcode(term);
+  //     //       // console.log(refcodeResult);
+  //     //     };
+  //     //     console.log('az if után');
+  //     //   })();
+  //     //   console.log('eredeti keresés foreach előtt');
+        
+  //     // });
+
+
+  listResults(searchResults);
+  showSpinner(false);
+}
+
+async function findByRef2(refcode){
+  console.log('findByRef2 fut');
+  var xhr = new XMLHttpRequest();
+  return new Promise((resolve, reject) => {
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) return;
+      if (xhr.status >= 200 && xhr.status < 300) {
+        var result = JSON.parse(xhr.responseText).data;
+        console.log(result);
+        // var translations = result[0].translations;
+        // var everything = [];
+
+        //resolve(translations);
+        resolve([]);
+      } else {
+        console.log('Hiba történt az xhr során. (findByRef2)');
+      }
+    };
+    xhr.onerror = function() {
+      console.log(xhr.statusText);
+    }
+    var url = 'https://api.white-konyvtar.hu/reader/paragraph/' + encodeURIComponent(refcode);
+    xhr.open('GET', url);
+    xhr.send();
+  });
+
+}
+
+async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+}
+
+async function processArray(array, callback) {
+  const promises = array.map(callback(item));
+  await Promise.all(promises);
+}
+
+function showSpinner(state = true) {
+  document.querySelector("#search-spinner").style.display = state ? "block" : "none";
+}
+
+async function search(term, translation = true){
+    // Set up our HTTP request
+    var xhr = new XMLHttpRequest();
+
+    return new Promise((resolve, reject) => {
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4) return;
+        if (xhr.status >= 200 && xhr.status < 300) {
+          text = JSON.parse(xhr.responseText).data;
+          resolve(text);
+        } else {
+          console.log('Hiba történt az xhr során. (search)');
+        }
+      };
+      xhr.onerror = function() {
+        console.log(xhr.statusText);
+      }
+      var urlPart = translation ? '/translation' : '';
+      var url = 'https://api.white-konyvtar.hu/reader/search' + urlPart + '?query=' + encodeURIComponent(term);
+      xhr.open('GET', url);
+      xhr.send();
+    });
+}
+
+function getRefCode(paraId){
+  var xhr = new XMLHttpRequest();
+  return new Promise((resolve, reject) => {
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) return;
+      if (xhr.status >= 200 && xhr.status < 300) {
+        var result = JSON.parse(xhr.responseText).data;
+        var refCode = result[0].refcode_short;
+        resolve(refCode);
+      } else {
+        console.log('Hiba történt az xhr során. (getRefCode)', xhr.status, xhr.statusText);
+      }
+    };
+    xhr.onerror = function() {
+      console.log(xhr.statusText);
+    }
+    var url = 'https://api.white-konyvtar.hu/reader/paragraph/' + encodeURIComponent(paraId);
+    xhr.open('GET', url);
+    xhr.send();
+  });
+}
+
+function findByRefcode(term){
+  console.log('findbyrefcode fut');
+  var xhr = new XMLHttpRequest();
+  return new Promise((resolve, reject) => {
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) return;
+      if (xhr.status >= 200 && xhr.status < 300) {
+        var result = JSON.parse(xhr.responseText).data;
+        var translations = result[0].translations;
+        resolve(translations);
+      } else {
+        console.log('Hiba történt az xhr során. (findByRefcode');
+      }
+    };
+    xhr.onerror = function() {
+      console.log(xhr.statusText);
+    }
+    var url = 'https://api.white-konyvtar.hu/reader/paragraph/' + encodeURIComponent(term);
+    xhr.open('GET', url);
+    xhr.send();
+  });
+}
+
+function listResults(results){
+  console.log('listResults');
+  var resultsCount = Object.keys(results).length;
+
+  // ha van találat
+  if (resultsCount > 0) {
+    var preparedTemplate = '';
+    for (var i=0; i < resultsCount; i++) {
+      var template = `
+      <li class="ms-ListItem result-li">
+        <div class="result-text">
+          <p>${results[i].content}</p>
+          <div class="fade-effect"></div>
+        </div>
+        <button class="unhideText">
+          <div class="arrowhead down"></div>
+        </button>
+        <div class="resultButtons">
+          <button class="insertText ms-Button">Beszúrás</button>
+          <!-- TODO refcode-dal mi a helyzet?? -->
+          <!-- 
+            <div class="result-reference">${results[i].book_code + " " + results[i].para_id}</div>
+            -->
+          <div class="result-reference">${results[i].refcode_short}</div>
+        </div>
+        <hr style="border: 0; border-top: 1px solid #eaeaea">
+      </li>
+      `;
+      preparedTemplate += template;
+    }
+    document.getElementById("search-results").innerHTML = preparedTemplate; 
+  } else { // ha nincs találat
+    console.log("nincs találat");
+    var template = `
+      <div class="no-result center">A megadott kifejezésre nincsen találat</div>
+    `;
+    document.getElementById("search-results").innerHTML += template;
+  };
+
+  Array.prototype.forEach.call(document.getElementsByClassName("result-li"), function(el, index, array) {
+    // kattintáskor beszúrja a dokumentumba az idézetet
+    el.getElementsByClassName("insertText")[0].onclick = function(e){
+      // TODO: itt is refcode dolog
+      // insert(results[index].content, results[index].book_code, results[index].para_id);
+      insert(results[index].content, results[index].refcode_short);
+    };
+
+    // kibontja a szöveget
+    el.querySelector(".unhideText").onclick = function(e){
+      var resultText = el.querySelector(".result-text");
+      if (this.classList.contains('opened')) {
+        this.classList.remove('opened');
+        resultText.classList.remove('opened');
+        // animált összecsukás miatt kell:
+        resultText.style.maxHeight = "10rem";
+      } else {
+        this.classList.add('opened');
+        resultText.classList.add('opened');
+        // animált kibontás miatt kell:
+        var finalHeight = resultText.querySelector("p").offsetHeight;
+        resultText.style.maxHeight = finalHeight + "px";
+      }
+    };
+  });
+
+  // csak akkor jelenjen meg ez a fade átmenet, ha van olyan szöveg, ami el van rejtve. 
+  // ez itt alul azt ellenőrzi, hogy kilóg-e a 'p' a .result-text-ből.
+  const containers = document.querySelectorAll('.result-text');
+  Array.prototype.forEach.call(containers, (container) => {  // Loop through each container
+    var p = container.querySelector('p');
+    var divh = container.clientHeight;
+    if (p.offsetHeight > divh) { // Check if the paragraph's height is taller than the container's height. If it is:
+      container.classList.add('tooLong');
+    }
+  });
+  console.log('teljesítve: ', window.performance.now() - startTime);
+}
+
+// TODO: itt is bookCode, paraID helyett refcode
+export async function insert(content, refcode) {
+  /**
+   * PowerPoint API beszúrás
+   */
+  text = content + " " + "{" + refcode + "}";
+
+  Office.context.document.setSelectedDataAsync(text,
+    {
+      coercionType: Office.CoercionType.Text
+    },
+    result => {
+      if (result.status === Office.AsyncResultStatus.Failed) {
+        console.error(result.error.message);
+      }
+    }
+  );
+}
+

@@ -1,0 +1,394 @@
+/* 
+ * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+ * See LICENSE in the project root for license information.
+ */
+
+* {
+    box-sizing: border-box;
+}
+
+ html,
+ body {
+     width: 100%;
+     height: 100%;
+     margin: 0;
+     padding: 0;
+     background-color: white;
+ }
+
+ main {
+    padding-top: 60px!important;
+ }
+
+ a {
+     color: #008cba;
+     text-decoration: none;
+ }
+ 
+ ul {
+     margin: 0;
+     padding: 0;
+ }
+ 
+ .center {
+     text-align: center;
+ }
+
+ .ms-welcome__header {
+    padding: 20px;
+    padding-bottom: 30px;
+    padding-top: 100px;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    align-items: center;
+ }
+
+ .ms-welcome__main {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    -webkit-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+    /* -webkit-align-items: center;
+    align-items: center; */
+    -webkit-flex: 1 0 0;
+    flex: 1 0 0;
+    padding: 10px 20px;
+ }
+ 
+ .ms-welcome__main > h2 {
+     width: 100%;
+     text-align: center;
+ }
+ 
+ .ms-welcome__features {
+     list-style-type: none;
+     margin-top: 20px;
+ }
+ 
+ .ms-welcome__features.ms-List .ms-ListItem {
+     padding-bottom: 20px;
+     display: -webkit-flex;
+     display: flex;
+ }
+ 
+ .ms-welcome__features.ms-List .ms-ListItem > .ms-Icon {
+     margin-right: 10px;
+ }
+ 
+ .ms-welcome__action.ms-Button--hero {
+     margin-top: 30px;
+ }
+ 
+.ms-Button.ms-Button--hero .ms-Button-label {
+  color: #0078d7;
+}
+
+.ms-Button.ms-Button--hero:hover .ms-Button-label,
+.ms-Button.ms-Button--hero:focus .ms-Button-label{
+  color: #005a9e;
+  cursor: pointer;
+}
+
+b {
+    font-weight: bold;
+}
+
+
+.result-li {
+    padding-bottom: 1rem;
+    position: relative;
+    list-style-type: none;
+}
+
+.result-text.truncated:after {
+    position: absolute;
+    bottom: 0;
+    height: 2rem;
+    width: 100%;
+    content: "";
+    background: linear-gradient(to top,
+    rgba(255,255,255, 1) 0%, 
+    rgba(255,255,255, 0) 80%
+    );
+    pointer-events: none; /* so the text is still selectable */
+}
+
+.result-text {
+    line-height: 1rem;
+    max-height: 10rem;
+    overflow: hidden;
+    transition: max-height 1s ease;
+    position: relative;
+}
+
+.result-text p {
+    padding: 0;
+    margin: 0;
+}
+
+.result-reference {
+    font-style: italic;
+}
+
+.tooLong .fade-effect {
+    display: block;
+}
+
+.tooLong + button.unhideText {
+    display: block;
+}
+
+.fade-effect {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 2rem;
+    /* background: rgba(255, 255, 0, 0.185); */
+    background: rgb(255,255,255);
+    background: linear-gradient(0deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8183648459383753) 35%, rgba(255,255,255,0) 100%);
+    /* display: none; */
+}
+
+#searchBox {
+    border: 0;
+    width: 186px;
+    width: calc(100% - 32px);
+    background: none transparent scroll repeat 0 0;
+    height: 100%;
+    padding: 3px 0 3px 5px;
+    margin: 0 1px 0 0;
+}
+
+
+.BtnSearchButton {
+    background-color: transparent;
+    border: medium none;
+    cursor: pointer;
+    margin: 2px 1px -2px -6px;
+    height: 16px;
+    width: 16px;
+}
+
+
+.searchbox-container {
+    width: 213px;
+    width: 100%;
+    padding: 1rem;
+}
+
+.top-search {
+    position: fixed;
+    background-color: white;
+    width: 100%;
+    height: 60px;
+    z-index: 1;
+    top: 0;
+}
+
+.BorderGray {
+    border: #DCDCDC 1px solid;
+
+}
+
+.ms-Button {
+    color: #333;
+    font-family: 'Segoe UI Regular WestEuropean', 'Segoe UI', 'Segoe WP', Tahoma, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    box-sizing: border-box;
+    margin: 0;
+    box-shadow: none;
+    background-color: #f4f4f4;
+    border: 1px solid #f4f4f4;
+    cursor: pointer;
+    display: inline-block;
+    height: 32px;
+    min-width: 80px;
+    padding: 4px 20px 6px
+}
+
+.ms-Button:focus .ms-Button-label,
+.ms-Button:hover .ms-Button-label {
+    color: #000
+}
+
+.ms-Button:focus,
+.ms-Button:hover {
+    background-color: #eaeaea;
+    outline: transparent solid 1px
+}
+
+.ms-Button:hover {
+    border-color: #eaeaea
+}
+
+.ms-Button:focus {
+    border-color: #0078d7
+}
+
+.ms-Button:active {
+    background-color: #0078d7;
+    border-color: #0078d7
+}
+
+.ms-Button:active .ms-Button-label {
+    color: #fff
+}
+
+.ms-Button.is-disabled,
+.ms-Button:disabled {
+    background-color: #f4f4f4;
+    border-color: #f4f4f4;
+    cursor: default
+}
+
+.ms-Button.is-disabled .ms-Button-label,
+.ms-Button:disabled .ms-Button-label {
+    color: #a6a6a6
+}
+
+.ms-Button.is-disabled:focus,
+.ms-Button.is-disabled:hover,
+.ms-Button:disabled:focus,
+.ms-Button:disabled:hover {
+    outline: 0
+}
+
+.ms-Button+.ms-Button {
+    margin-left: 6px
+}
+
+.ms-Button-label {
+    color: #333;
+    font-family: 'Segoe UI Semibold WestEuropean', 'Segoe UI Semibold', 'Segoe WP Semibold', 'Segoe UI', 'Segoe WP', Tahoma, Arial, sans-serif;
+    font-size: 14px
+}
+
+.ms-Button-description,
+.ms-Button-icon {
+    display: none
+}
+
+.ms-Button.ms-Button--primary {
+    background-color: #0078d7;
+    border-color: #0078d7
+}
+
+.ms-Button.ms-Button--primary .ms-Button-label {
+    color: #fff
+}
+
+.ms-Button.ms-Button--primary:hover {
+    background-color: #005a9e;
+    border-color: #005a9e
+}
+
+.ms-Button.ms-Button--primary:focus {
+    background-color: #005a9e;
+    border-color: #004578
+}
+
+.ms-Button.ms-Button--primary:active {
+    background-color: #0078d7;
+    border-color: #0078d7
+}
+
+.ms-Button.ms-Button--primary.is-disabled,
+.ms-Button.ms-Button--primary:disabled {
+    background-color: #f4f4f4;
+    border-color: #f4f4f4
+}
+
+.ms-Button.ms-Button--primary.is-disabled .ms-Button-label,
+.ms-Button.ms-Button--primary:disabled .ms-Button-label {
+    color: #a6a6a6
+}
+
+.resultButtons {
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+}
+
+.insert-text, .result-reference {
+    display: inline-block;
+}
+
+.unhideText {
+    display: none;
+    width: 100%;
+    text-align: center;
+    background: white;
+    border: 0;
+    box-shadow: none;
+    cursor: pointer;
+    
+}
+
+.unhideText:hover {
+    background-color: #eaeaea;
+
+}
+
+.unhideText.opened .arrowhead {
+    transform: rotate(225deg);
+    transition: 1s ease-in;
+}
+
+.result-text.opened .fade-effect {
+    display: none;
+}
+
+#search-spinner {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* margin-top: 3rem; */
+}
+
+@keyframes spinner {
+    to {transform: rotate(360deg);}
+  }
+   
+.spinner {
+    position: relative;
+    width: 100%;
+    height: 50px;
+}
+
+.spinner:before {
+    content: '';
+    box-sizing: border-box;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin-top: -10px;
+    margin-left: -10px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    border-top-color: #000;
+    animation: spinner .6s linear infinite;
+}
+
+.arrowhead {
+    border: solid #333333;
+    border-width: 0 2px 2px 0;
+    display: inline-block;
+    padding: 3px;
+}
+
+.down {
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    transition: 1s ease-in;
+}
