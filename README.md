@@ -7,6 +7,8 @@ This plugin searches the egw.hu database for quotes.
 - Run `npm install`
 - For running the plugin on a live dev server, run `npm start` in the project root.
 - For debugging the sidebar in the desktop PowerPoint use IEChooser.exe or F12Chooser.exe `c:\windows\SysWOW64\F12\IEChooser.exe`
+- Alternatively web version of office can be used with the browser's dev tools.
+- manifest.xml can be manually uploaded through Insert > Office Add-ins > Upload My Add-in
 - For building, run `npm run build`
 
 # Deploying to the AppSource Office Store
